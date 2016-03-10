@@ -21,6 +21,10 @@ const App = React.createClass({
 
     this.setState({ tasks: this.state.tasks });
 
+    $.post('/tasks').done((data) => {
+      
+    })
+
   },
   toggleTask:function(key){
     this.state.tasks[key].completed = !this.state.tasks[key].completed;
@@ -33,7 +37,7 @@ const App = React.createClass({
   },
   filterNotComplete:function(key){
     return !this.filterComplete(key)
-  }, 
+  },
   renderTask:function(key){
     return (
       <Task key={key} index={key} details={this.state.tasks[key]} toggleTask={this.toggleTask} />
@@ -43,10 +47,10 @@ const App = React.createClass({
   render:function() {
     return (
       <div className="container">
-      
+
         <div className="row">
           <section className="col s12">
-          
+
             {/*to do unfinished tasks*/}
             <section id="todo-display" className="col s7">
               <ul className="collection with-header">
@@ -97,7 +101,7 @@ const CreateTaskForm = React.createClass({
 
     // add the task to the state
     this.props.addTask(task);
-    
+
     // clear the form
     this.refs.taskForm.reset();
 
@@ -150,8 +154,3 @@ const Task = React.createClass({
 
 
 ReactDOM.render(<App />, document.querySelector('#container'))
-
-
-
-
-

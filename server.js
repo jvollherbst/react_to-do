@@ -3,11 +3,16 @@ const express     = require('express');
 const logger      = require('morgan');
 const path        = require('path');
 const bodyParser  = require('body-parser');
+const db          = require('./db/pg');
+const dotenv      = require ('dotenv');
+
 
 const app       = express();
 const _port     = process.argv[2]|| process.env.port||3009;
 
 const taskRoutes     = require('./routes/tasks');
+dotenv.load();
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,5 +32,5 @@ app.get('/',(req,res)=>{
 
 // turn me on!
 app.listen(_port , ()=>
-  console.log(`server here! listening on`, _port ) 
+  console.log(`server here! listening on`, _port )
 )
