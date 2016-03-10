@@ -2,71 +2,88 @@ var pgp = require('pg-promise')();
 var cn  = 'postgres://jasminecardoza:' + process.env.DB_PASSWORD + '@localhost/tasks_db';
 var db  = pgp(cn);
 
-// function query(query, values, qrm);
-function getTasks(req, res, next){
-db.any("select task_name, task_desc from tasks")
-    .then(function (data){
-      console.log(data)
+function getTasks(req, res, next) {
+  db.any("SELECT * from tasks;")
+    .then(function (data) {
       res.rows = data;
       next();
-        // success;
     })
     .catch(function (error) {
         // error;
+      console.log('Error', error);
     });
 }
 
-function addTasks(req, res, next){
-  console.log(req.body);
-db.one(`insert into tasks (task_name, task_desc) values ($1, $2) returning task_id;`,
-[req.body.task_name, req.body.task_desc] )
-    .then(function (data){
-      console.log('task added successfully')
+function addTask(req, res, next) {
+  db.one(`
+    INSERT INTO
+    tasks (task_name, task_desc)
+    VALUES ($1, $2)
+    returning task_id;`,
+        [ req.body.name , req.body.description ]
+    )
+    .then((data)=>{
+      console.log('ADDED TASK SUCCESSFUL');
       res.rows = data;
       next();
-        // success;
     })
-    .catch(function (error) {
-        // error;
-        console.log('error adding task', error);
-
-    });
+    .catch((error)=>{
+      console.log('ERROR in ADDING TASK!', error);
+    })
 }
 
-function toggleTask(req, res, next){
-  console.log(req.body);
-db.none(`UPDATE tasks SET completed = false, WHERE task_id = ($1);`,
-[req.params.task_id])
-    .then(function (data){
-      console.log('where udpate task successful')
-      res.rows = data;
+function toggleTask(req, res, next) {
+  db.none(`
+    UPDATE tasks
+    SET completed = NOT completed
+    WHERE task_id = ($1);`,
+          [ req.params.taskid ]
+    )
+    .then(()=>{
+      console.log('UPDATED TASK SUCCESSFUL!');     // testing status for UPDATE
       next();
-        // success;
     })
-    .catch(function (error) {
-        // error;
-    });
+    .catch((error)=>{
+      console.log('ERROR in EDITING TASK DETAILS!', error);
+    })
 }
 
-function updateTime(req, res, next){
-  console.log(req.body);
-db.none(`UPDATE tasks SET task_time_start = ($1), task_time_end = ($2) WHERE task_id = ($3);`,
-[req.body.task_time_start, req.body.task_time_end, req.params.task_id])
-    .then(function (data){
-      console.log('where udpate task successful')
-      res.rows = data;
+function updateTime(req, res, next) {
+  db.none(`
+      UPDATE tasks
+      SET
+        task_time_start = ($1),
+        task_time_end = ($2)
+      WHERE task_id = ($3);`,
+        [ req.body.start_time, req.body.end_time , req.params.taskid ] )
+  .then(()=>{
+    console.log('UPDATED TASK TIME SUCCESSFUL!');     // testing status for UPDATE
+    next();
+  })
+  .catch((error)=>{
+    console.log('ERROR in EDITING TIME!', error);
+  })
+}
+
+function deleteTask(req, res, next) {
+  db.none(`
+    DELETE FROM
+    tasks WHERE task_id = ($1);`,
+          [ req.params.taskid ])
+    .then(()=>{
+      console.log('DELETE COMPLETED!');     // testing status for DELETE
       next();
-        // success;
     })
-    .catch(function (error) {
-        // error;
-    });
+    .catch((error)=>{
+      console.log('ERROR in DELETING TASK!', error);
+    })
 }
 
-module.exports.db = db;
-module.exports.pgp = pgp;
 
-module.exports.getTasks = getTasks;
-module.exports.addTasks = addTasks;
+
+
+module.exports.getTasks   = getTasks;
+module.exports.addTask    = addTask;
 module.exports.toggleTask = toggleTask;
+module.exports.deleteTask = deleteTask;
 module.exports.updateTime = updateTime;
